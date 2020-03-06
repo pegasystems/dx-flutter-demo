@@ -169,25 +169,25 @@ class FetchPage {
 /// this action is useful to avoid changing the current page during hot reloading
 /// SetCurrentPage should be used to update it unconditionally
 class InitCurrentPage {
-  final Map page;
+  final UnmodifiableMapView<String, dynamic> page;
 
   const InitCurrentPage(this.page);
 }
 
 class SetCurrentPage {
-  final Map page;
+  final UnmodifiableMapView<String, dynamic> page;
 
   const SetCurrentPage(this.page);
 }
 
 class UpdateCurrentPage {
-  final Map data;
+  final UnmodifiableMapView<String, dynamic> data;
 
   const UpdateCurrentPage(this.data);
 }
 
 class SetCurrentPortal {
-  final Map portal;
+  final UnmodifiableMapView<String, dynamic> portal;
 
   const SetCurrentPortal(this.portal);
 }
