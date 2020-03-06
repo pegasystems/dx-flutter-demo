@@ -15,7 +15,7 @@ import '../factory.dart';
 
 class AssignmentForm extends StatefulWidget {
   final ActionData actionData;
-  final List children;
+  final List<Map<String, dynamic>> children;
 
   const AssignmentForm(this.actionData, this.children);
 
@@ -43,15 +43,22 @@ class AssignmentFormState extends State<AssignmentForm> {
       }
     });
 
-    dxStoreSubscription =
-        dxStore.onChange.listen((dxState) {
-          final Map errorData = dxState['lastError'];
-          if (errorData != null) {
-            final String title = errorData['errorClassification'];
-            final String content = errorData.containsKey('errorDetails') && errorData['errorDetails'] is List ?
-              errorData['errorDetails'].fold('', (message, errorDetail) => message + errorDetail['localizedValue'] + '\n') : '';
+    dxStoreSubscription = dxStore.onChange.listen((dxState) {
+      final Map errorData = dxState['lastError'];
+      if (errorData != null) {
+        final String title = errorData['errorClassification'];
+        final String content = errorData.containsKey('errorDetails') &&
+                errorData['errorDetails'] is List
+            ? errorData['errorDetails'].fold(
+                '',
+                (message, errorDetail) =>
+                    message + errorDetail['localizedValue'] + '\n')
+            : '';
 
-            showDialog(context: context, barrierDismissible: false, builder: (BuildContext context) {
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
               return AlertDialog(
                 title: Text(title),
                 content: Text(content),
@@ -60,16 +67,16 @@ class AssignmentFormState extends State<AssignmentForm> {
                     child: Text('OK'),
                     onPressed: () {
                       dxStore.dispatch(RemoveError());
-                      dxStore.dispatch(
-                          ToggleCustomButtonsVisibility({DxContextButtonAction.submit: true}));
+                      dxStore.dispatch(ToggleCustomButtonsVisibility(
+                          {DxContextButtonAction.submit: true}));
                       Navigator.of(context).pop();
                     },
                   ),
                 ],
               );
             });
-          }
-        });
+      }
+    });
 
     super.initState();
   }

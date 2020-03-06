@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:dx_flutter_demo/utils/dx_store.dart';
 
 class AssignmentsList extends StatelessWidget {
-  final List<dynamic> assignments;
+  final List assignments;
   final String keyFieldName;
   final String labelFieldName;
   final String idFieldName;
@@ -24,8 +24,10 @@ class AssignmentsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    dxStore.dispatch(ToggleCustomButtonsVisibility(
-        {DxContextButtonAction.filter: true, DxContextButtonAction.search: true}));
+    dxStore.dispatch(ToggleCustomButtonsVisibility({
+      DxContextButtonAction.filter: true,
+      DxContextButtonAction.search: true
+    }));
     return Expanded(
         child: ListView.builder(
             scrollDirection: Axis.vertical,

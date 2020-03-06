@@ -28,7 +28,4 @@ This Flutter project allows to build an Android and/or iOS application that comm
 - With the plugin installed, open `pubspec.yaml` then click on `Packages get`. Alternatively from the command line `flutter packages get` from the project's root directory. This will install the project's package dependencies.
 - For some reason I can't understand, you will need to run `pod install` from `ios` folder if you want to run the app on iOS (it's something with cocoa, so it can't be dangerous)
 - To point to your Pega instance (see the above [section](#hold-your-horses-bill)), open `utils/dx_api.dart` and change `_username`, `_password` and `_baseUrl` to use your Pega Platform 8.4 instance.
-- To run the application on Android, you need first to manually start the emulator (use `emulator -avd YOUR_AVD_NAME`). For iOS, the selected emulator will be started automatically.
-- Hit the Run/Debug button.
-- [Report](https://github.com/Pegasystems-Krakow/dx-flutter-demo/issues) a bug **Today**
-
+- Select your favorite device/emulator and hit the Run/Debug button.

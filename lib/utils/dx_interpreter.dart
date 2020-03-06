@@ -2,33 +2,29 @@
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:dx_flutter_demo/utils/dx_store.dart';
 
-Map getMergedImmutableCopy(Map data1, Map data2) {
-  final data3 = Map<String, dynamic>.from(data1);
-  data2.keys.forEach((key) {
-    data3.update(key, (oldValue) {
-      if (oldValue is Map && data2[key] is Map) {
-        return getMergedImmutableCopy(Map<String, dynamic>.from(oldValue),
-            Map<String, dynamic>.from(data2[key]));
-      }
-      return data2[key];
-    }, ifAbsent: () => data2[key]);
-  });
-  return Map.unmodifiable(data3);
-}
+// data helpers
 
-/// returns an immutable copy of the provide data
-dynamic getImmutableCopy(dynamic data) {
-  if (data is Map) {
-    return Map.unmodifiable(
-        data.map((key, value) => MapEntry(key, getImmutableCopy(value))));
-  }
-  if (data is List) {
-    return List.unmodifiable(data.map((entry) => getImmutableCopy(entry)));
-  }
-  return data;
-}
+Map getWorkObjectData(DxContext dxContext) =>
+    _getDxContextData(dxContext, 'data')['content'];
+
+Map getCurrentPortal() => getDataPropertyRecursive(
+    dxStore.state, [DxContext.currentPortal.toString()]);
+
+Map getCurrentPage() => dxStore.state[DxContext.currentPage.toString()];
+
+Map getCurrentPageData() =>
+    getDataPropertyRecursive(getCurrentPage(), ['data']);
+
+String getCurrentPageClassName() => getDataPropertyRecursive(
+    getCurrentPage(), ['data', 'case_summary', 'caseClass']);
+
+Map getContextButtonsVisibility(Map data) => data['contextButtonsVisibility'];
+
+Map getCurrentFormData() => dxStore.state['currentFormData'];
 
 Map _getDxContextData(DxContext dxContext, String key) {
   Map contextData = dxStore.state[dxContext.toString()];
@@ -55,25 +51,6 @@ dynamic getDataPropertyRecursive(Map data, List<String> keys) {
       }
       return data[keys.first];
     }
-  }
-  return null;
-}
-
-Map getReferencedNode(Map node, DxContext dxContext) {
-  final type = getDataPropertyRecursive(node, ['config', 'type']);
-  final name = resolvePropertyValue(
-      getDataPropertyRecursive(node, ['config', 'name']), dxContext);
-  switch (type) {
-    case 'view':
-      final data = dxStore.state[dxContext.toString()];
-      final viewData =
-          getDataPropertyRecursive(data, ['resources', 'views', name]);
-      // fallback to Portal views lookup
-      if (viewData == null && dxContext == DxContext.currentPage) {
-        final data = dxStore.state[DxContext.currentPortal.toString()];
-        return getDataPropertyRecursive(data, ['resources', 'views', name]);
-      }
-      return viewData;
   }
   return null;
 }
@@ -176,22 +153,71 @@ List<String> getStoreRefKeys(Map node, {String key}) {
   });
 }
 
-Map getWorkObjectData(DxContext dxContext) =>
-    _getDxContextData(dxContext, 'data')['content'];
+// helpers that operate on ui metadata
 
-Map getRootNode(Map data) => getDataPropertyRecursive(data, ['root']);
+/// returns the ui metadata node reference dby the given ui metadata node in the given context (portal or page)
+UnmodifiableMapView<String, dynamic> getReferencedNode(
+    UnmodifiableMapView<String, dynamic> node, DxContext dxContext) {
+  final String type = getDataPropertyRecursive(node, ['config', 'type']);
+  final String name = resolvePropertyValue(
+      getDataPropertyRecursive(node, ['config', 'name']), dxContext);
+  switch (type) {
+    case 'view':
+      final data = dxStore.state[dxContext.toString()];
+      final viewData =
+          getDataPropertyRecursive(data, ['resources', 'views', name]);
+      // fallback to Portal views lookup
+      if (viewData == null && dxContext == DxContext.currentPage) {
+        final data = dxStore.state[DxContext.currentPortal.toString()];
+        return getDataPropertyRecursive(data, ['resources', 'views', name])
+            .cast<String, dynamic>();
+      }
+      return viewData.cast<String, dynamic>();
+  }
+  return null;
+}
 
-Map getCurrentPortal() => getDataPropertyRecursive(
-    dxStore.state, [DxContext.currentPortal.toString()]);
+/// returns the ui metadata root node for the current data structure (eg. page or portal data)
+UnmodifiableMapView<String, dynamic> getRootNode(Map data) =>
+    getDataPropertyRecursive(data, ['root']).cast<String, dynamic>();
 
-Map getCurrentPage() => dxStore.state[DxContext.currentPage.toString()];
+/// returns a list of child nodes for a given ui metadata node
+List<UnmodifiableMapView<String, dynamic>> getChildNodes(
+    UnmodifiableMapView<String, dynamic> node) {
+  if (node.containsKey('children') && node['children'] is List) {
+    List children = node['children'];
+    return children.cast<UnmodifiableMapView<String, dynamic>>();
+  }
+  return List<UnmodifiableMapView<String, dynamic>>();
+}
 
-Map getCurrentPageData() =>
-    getDataPropertyRecursive(getCurrentPage(), ['data']);
+// more generic helpers
 
-String getCurrentPageClassName() => getDataPropertyRecursive(
-    getCurrentPage(), ['data', 'case_summary', 'caseClass']);
+/// this method deep-merges to map structures into one inmutable map structure
+UnmodifiableMapView<String, dynamic> getMergedImmutableCopy(
+    Map targetData, Map updateData) {
+  final mergedData = Map<String, dynamic>.from(targetData);
+  updateData.keys.forEach((key) {
+    mergedData.update(key, (oldValue) {
+      if (oldValue is Map && updateData[key] is Map) {
+        return getMergedImmutableCopy(Map<String, dynamic>.from(oldValue),
+            Map<String, dynamic>.from(updateData[key]));
+      }
+      return getImmutableCopy(updateData[key]);
+    }, ifAbsent: () => getImmutableCopy(updateData[key]));
+  });
+  return Map<String, dynamic>.unmodifiable(mergedData);
+}
 
-Map getContextButtonsVisibility(Map data) => data['contextButtonsVisibility'];
-
-Map getCurrentFormData() => dxStore.state['currentFormData'];
+/// returns an immutable copy of the provided dynamic data structure (eg. json)
+dynamic getImmutableCopy(dynamic data) {
+  if (data is Map) {
+    return Map<String, dynamic>.unmodifiable(
+        data.map((key, value) => MapEntry(key, getImmutableCopy(value))));
+  }
+  if (data is List) {
+    return List<dynamic>.unmodifiable(
+        data.map((entry) => getImmutableCopy(entry)));
+  }
+  return data;
+}
