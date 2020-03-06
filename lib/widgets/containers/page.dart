@@ -8,7 +8,7 @@ import '../factory.dart';
 
 class Page extends StatelessWidget {
   final String title;
-  final List children;
+  final List<Map<String, dynamic>> children;
 
   const Page(this.title, this.children);
 

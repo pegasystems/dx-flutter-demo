@@ -2,6 +2,8 @@
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/scheduler.dart';
 import 'package:dx_flutter_demo/utils/dx_interpreter.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -21,7 +23,7 @@ void main() {
             accentColor: Colors.blue,
           ),
           navigatorKey: navigator.key,
-          home: StoreConnector<Map, dynamic>(
+          home: StoreConnector<UnmodifiableMapView<String, dynamic>, UnmodifiableMapView<String, dynamic>>(
               converter: (dxStore) => getCurrentPortal(),
               distinct: true,
               builder: (context, portal) {

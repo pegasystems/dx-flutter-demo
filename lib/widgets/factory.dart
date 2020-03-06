@@ -2,6 +2,8 @@
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:dx_flutter_demo/utils/dx_interpreter.dart';
@@ -22,7 +24,7 @@ import 'containers/app_shell.dart';
 import 'containers/region.dart';
 import 'other/error_box.dart';
 
-List<Widget> getWidgets(List<dynamic> nodes, BuildContext context,
+List<Widget> getWidgets(List<Map<String, dynamic>> nodes, BuildContext context,
     {DxContext dxContext = DxContext.currentPage}) {
   if (nodes != null) {
     return nodes
@@ -35,9 +37,10 @@ List<Widget> getWidgets(List<dynamic> nodes, BuildContext context,
 
 // in some cases the given node won't have a representation in the application's layout
 // this method will skip one node to continue rendering its children
-Widget skipNode(Map node, BuildContext context,
+Widget skipNode(UnmodifiableMapView<String, dynamic> node, BuildContext context,
     {DxContext dxContext = DxContext.currentPage}) {
-  final List children = node['children'] is List ? node['children'] : [];
+  final List<UnmodifiableMapView<String, dynamic>> children =
+      getChildNodes(node);
   if (children.length > 1) {
     return Expanded(
         child: Column(
@@ -47,7 +50,8 @@ Widget skipNode(Map node, BuildContext context,
 }
 
 /// method responsible for spitting out flutter widgets based on the current ui metadata node and context data
-Widget getWidget(Map node, BuildContext context,
+Widget getWidget(
+    UnmodifiableMapView<String, dynamic> node, BuildContext context,
     {DxContext dxContext = DxContext.currentPage}) {
   // check if node has a reference to another arbitrary leaf in the ui metadata tree
   if (hasReference(node)) {
@@ -71,7 +75,7 @@ Widget getWidget(Map node, BuildContext context,
           'pyLabel', 'pxRefObjectKey', 'pxUrgencyAssign', 'pyAssignmentStatus');
     case 'Region':
       final String name = node['name'];
-      final List children = node['children'] is List ? node['children'] : [];
+      final List<Map<String, dynamic>> children = getChildNodes(node);
       return Region(name, children);
     case 'Page':
       String title = getDataPropertyRecursive(node, ['config', 'title']);
@@ -82,7 +86,7 @@ Widget getWidget(Map node, BuildContext context,
           title += ', $operator';
         }
       }
-      return Page(title, node['children']);
+      return Page(title, getChildNodes(node));
     case 'AppShell':
       final String appName = resolvePropertyValue(
           getDataPropertyRecursive(node, ['config', 'appName']), dxContext);
@@ -90,8 +94,8 @@ Widget getWidget(Map node, BuildContext context,
           getDataPropertyRecursive(node, ['config', 'pages']), dxContext);
       final List caseTypes = getListFromDataSource(
           getDataPropertyRecursive(node, ['config', 'caseTypes']), dxContext);
-      final List children = node['children'] is List ? node['children'] : [];
-      final Map currentPage = children.first;
+      final List<Map<String, dynamic>> children = getChildNodes(node);
+      final Map<String, dynamic> currentPage = children.first;
       // dx store's current page is set only if not yet initialized
       // subsequent "InitCurrentPage" actions (eg. during hot-reloading) won't take effect
       dxStore.dispatch(InitCurrentPage(currentPage));
@@ -103,7 +107,7 @@ Widget getWidget(Map node, BuildContext context,
           getDataPropertyRecursive(node, ['config', 'id']), dxContext);
       final String iconName =
           getDataPropertyRecursive(node, ['config', 'icon']);
-      final List children = node['children'] is List ? node['children'] : [];
+      final List<Map<String, dynamic>> children = getChildNodes(node);
       return CaseView(label, id, iconName, children);
     case 'CaseSummary':
       final List primaryFields = resolvePropertyValues(
@@ -118,7 +122,8 @@ Widget getWidget(Map node, BuildContext context,
           getDataPropertyRecursive(node, ['config', 'status']), dxContext);
       return CaseSummary(status, primaryFields, secondaryFields);
     case 'Stages':
-      return StoreConnector<Map, dynamic>(
+      return StoreConnector<UnmodifiableMapView<String, dynamic>,
+              UnmodifiableMapView<String, dynamic>>(
           converter: (store) => getCurrentPageData(),
           distinct: true,
           builder: (context, value) {
@@ -128,7 +133,8 @@ Widget getWidget(Map node, BuildContext context,
             return CaseStageIndicator(stages);
           });
     case 'TextInput':
-      return StoreConnector<Map, dynamic>(
+      return StoreConnector<UnmodifiableMapView<String, dynamic>,
+              UnmodifiableMapView<String, dynamic>>(
           converter: (store) => getCurrentFormData(),
           distinct: true,
           builder: (context, value) {
@@ -147,7 +153,8 @@ Widget getWidget(Map node, BuildContext context,
                     .dispatch(UpdateCurrentFormData(propertyValueRef, value)));
           });
     case 'Dropdown':
-      return StoreConnector<Map, dynamic>(
+      return StoreConnector<UnmodifiableMapView<String, dynamic>,
+              UnmodifiableMapView<String, dynamic>>(
           converter: (store) => getCurrentFormData(),
           distinct: true,
           builder: (context, value) {
@@ -170,7 +177,8 @@ Widget getWidget(Map node, BuildContext context,
                     .dispatch(UpdateCurrentFormData(propertyValueRef, value)));
           });
     case 'Integer':
-      return StoreConnector<Map, dynamic>(
+      return StoreConnector<UnmodifiableMapView<String, dynamic>,
+              UnmodifiableMapView<String, dynamic>>(
           converter: (store) => getCurrentFormData(),
           distinct: true,
           builder: (context, value) {
@@ -199,8 +207,7 @@ Widget getWidget(Map node, BuildContext context,
         if (showList == 'false') {
           final String actionId = node['name'];
           final ActionData actionData = resolveActionData(actionId, dxContext);
-          final List children =
-              node['children'] is List ? node['children'] : [];
+          final List<Map<String, dynamic>> children = getChildNodes(node);
           return AssignmentForm(actionData, children);
         }
         return Expanded(

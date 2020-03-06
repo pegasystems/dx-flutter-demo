@@ -8,7 +8,7 @@ import '../factory.dart';
 
 class Region extends StatelessWidget {
   final String name;
-  final List children;
+  final List<Map<String, dynamic>> children;
 
   const Region(this.name, this.children);
 

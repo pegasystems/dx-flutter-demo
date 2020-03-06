@@ -11,7 +11,7 @@ class CaseView extends StatelessWidget {
   final String label;
   final String id;
   final String iconName;
-  final List children;
+  final List<Map<String, dynamic>> children;
 
   const CaseView(this.label, this.id, this.iconName, this.children);
 
@@ -37,7 +37,6 @@ class CaseView extends StatelessWidget {
             ],
           ),
         ));
-    return Column(
-        children: [header, ...getWidgets(children, context)]);
+    return Column(children: [header, ...getWidgets(children, context)]);
   }
 }

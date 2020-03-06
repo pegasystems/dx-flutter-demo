@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:dx_flutter_demo/utils/dx_interpreter.dart';
 import 'package:redux/redux.dart';
@@ -19,69 +20,81 @@ enum DxContext {
   currentPage
 }
 
-Map _replaceCurrentPage(Map state, Map page) {
-  final mutableState = Map.from(state);
+UnmodifiableMapView<String, dynamic> _replaceCurrentPage(
+    UnmodifiableMapView<String, dynamic> state,
+    UnmodifiableMapView<String, dynamic> page) {
+  final mutableState = Map<String, dynamic>.from(state);
   if (page['root'] == null) {
-    page = Map.unmodifiable({'root': page});
+    page = Map<String, dynamic>.unmodifiable({'root': page});
   }
   mutableState['fetchingData'] = false;
   mutableState['currentFormData'] = null;
   mutableState[DxContext.currentPage.toString()] = page;
-  return Map.unmodifiable(mutableState);
+  return Map<String, dynamic>.unmodifiable(mutableState);
 }
 
 // redux store reducers
-final _reducer = combineReducers<Map>([
-  TypedReducer<Map, SetCurrentPortal>((state, action) {
+final _reducer = combineReducers<UnmodifiableMapView<String, dynamic>>([
+  TypedReducer<UnmodifiableMapView<String, dynamic>, SetCurrentPortal>(
+      (state, action) {
     return getMergedImmutableCopy(
         state, {DxContext.currentPortal.toString(): action.portal});
   }),
-  TypedReducer<Map, InitCurrentPage>((state, action) {
+  TypedReducer<UnmodifiableMapView<String, dynamic>, InitCurrentPage>(
+      (state, action) {
     if (state[DxContext.currentPage.toString()] == null) {
       return _replaceCurrentPage(state, action.page);
     }
     return state;
   }),
-  TypedReducer<Map, SetCurrentPage>((state, action) {
+  TypedReducer<UnmodifiableMapView<String, dynamic>, SetCurrentPage>(
+      (state, action) {
     return _replaceCurrentPage(state, action.page);
   }),
-  TypedReducer<Map, UpdateCurrentPage>((state, action) {
+  TypedReducer<UnmodifiableMapView<String, dynamic>, UpdateCurrentPage>(
+      (state, action) {
     return getMergedImmutableCopy(state, {
       'fetchingData': false,
       'currentFormData': null,
       DxContext.currentPage.toString(): action.data
     });
   }),
-  TypedReducer<Map, FetchPage>((state, action) {
+  TypedReducer<UnmodifiableMapView<String, dynamic>, FetchPage>(
+      (state, action) {
     return getMergedImmutableCopy(state, {
       'fetchingData': true,
       'contextButtonsVisibility': initialContextButtonsVisibility
     });
   }),
-  TypedReducer<Map, ProcessAssignment>((state, action) {
+  TypedReducer<UnmodifiableMapView<String, dynamic>, ProcessAssignment>(
+      (state, action) {
     return getMergedImmutableCopy(state, {
       'fetchingData': true,
       'contextButtonsVisibility': initialContextButtonsVisibility
     });
   }),
-  TypedReducer<Map, AddError>((state, action) {
+  TypedReducer<UnmodifiableMapView<String, dynamic>, AddError>((state, action) {
     return getMergedImmutableCopy(
         state, {'fetchingData': false, 'lastError': action.errorData});
   }),
-  TypedReducer<Map, RemoveError>((state, action) {
+  TypedReducer<UnmodifiableMapView<String, dynamic>, RemoveError>(
+      (state, action) {
     return getMergedImmutableCopy(state, {'lastError': null});
   }),
-  TypedReducer<Map, OpenAssignment>((state, action) {
+  TypedReducer<UnmodifiableMapView<String, dynamic>, OpenAssignment>(
+      (state, action) {
     return getMergedImmutableCopy(state, {'fetchingData': true});
   }),
-  TypedReducer<Map, ToggleCustomButtonsVisibility>((state, action) {
+  TypedReducer<UnmodifiableMapView<String, dynamic>,
+      ToggleCustomButtonsVisibility>((state, action) {
     return getMergedImmutableCopy(state, {
       'contextButtonsVisibility': action.buttonToggles.map(
           (DxContextButtonAction button, bool shouldDisplay) =>
               MapEntry(button.toString(), shouldDisplay))
     });
   }),
-  TypedReducer<Map, UpdateCurrentFormData>((state, action) {
+  TypedReducer<UnmodifiableMapView<String, dynamic>, UpdateCurrentFormData>(
+      (state, action) {
     final String propertyKey =
         action.propertyValueReference.split('@P').last.split('.').last;
     return getMergedImmutableCopy(state, {
@@ -234,7 +247,7 @@ final initialContextButtonsVisibility = Map.unmodifiable({
 });
 
 // redux store initialization
-final dxStore = Store<Map>(_reducer,
+final dxStore = Store<UnmodifiableMapView<String, dynamic>>(_reducer,
     initialState: Map<String, dynamic>.unmodifiable({
       'fetchingData': false,
       'contextButtonsVisibility': initialContextButtonsVisibility,

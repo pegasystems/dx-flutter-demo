@@ -2,6 +2,8 @@
 // Use of this source code is governed by a Apache 2.0 license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:dx_flutter_demo/utils/dx_interpreter.dart';
@@ -22,20 +24,24 @@ class AppShell extends StatelessWidget {
     return Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(title: Text(appName)),
-        floatingActionButton: StoreConnector<Map, Map>(
+        floatingActionButton: StoreConnector<
+                UnmodifiableMapView<String, dynamic>,
+                UnmodifiableMapView<String, dynamic>>(
             converter: (dxStore) => getContextButtonsVisibility(dxStore.state),
             distinct: true,
             builder: (context, Map contextButtonsVisibility) {
-              if (contextButtonsVisibility[DxContextButtonAction.submit.toString()] ==
+              if (contextButtonsVisibility[
+                      DxContextButtonAction.submit.toString()] ==
                   true) {
                 return FloatingActionButton(
                   onPressed: () =>
-                    contextButtonActions.add(DxContextButtonAction.submit),
+                      contextButtonActions.add(DxContextButtonAction.submit),
                   child: Icon(getIconData('pi-check')),
                   backgroundColor: Colors.green,
                 );
               }
-              if (contextButtonsVisibility[DxContextButtonAction.filter.toString()] ==
+              if (contextButtonsVisibility[
+                      DxContextButtonAction.filter.toString()] ==
                   true) {
                 return FloatingActionButton(
                   onPressed: () {
@@ -47,7 +53,8 @@ class AppShell extends StatelessWidget {
               }
               return Container(width: 0, height: 0);
             }),
-        body: StoreConnector<Map, dynamic>(
+        body: StoreConnector<UnmodifiableMapView<String, dynamic>,
+                UnmodifiableMapView<String, dynamic>>(
             converter: (dxStore) => getCurrentPage(),
             distinct: true,
             builder: (context, node) => getWidget(getRootNode(node), context)),
