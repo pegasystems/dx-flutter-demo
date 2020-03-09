@@ -31,7 +31,9 @@ class LoadingOverlay extends ModalRoute<void> {
   ) {
     return Material(
       type: MaterialType.transparency,
-      child: SafeArea(child: Center(child: CircularProgressIndicator())),
+      child: SafeArea(child: Center(child: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF295ED9)),
+      ))),
     );
   }
 

@@ -19,8 +19,9 @@ void main() {
       child: MaterialApp(
           title: 'DxFlutter',
           theme: ThemeData(
-            primaryColor: Colors.white,
-            accentColor: Colors.blue,
+            primaryColor: Color(0xFF383838),
+            accentColor: Color(0xFF919191),
+            unselectedWidgetColor: Color(0xFF919191)
           ),
           navigatorKey: navigator.key,
           home: StoreConnector<UnmodifiableMapView<String, dynamic>, UnmodifiableMapView<String, dynamic>>(
@@ -28,7 +29,8 @@ void main() {
               distinct: true,
               builder: (context, portal) {
                 if (portal != null) {
-                  return getWidget(getRootNode(portal), context,
+                  final node = getRootNode(portal);
+                  return getWidget(node, context, getUpdatedPathContext('', node),
                       dxContext: DxContext.currentPortal);
                 }
                 return SplashLoading();

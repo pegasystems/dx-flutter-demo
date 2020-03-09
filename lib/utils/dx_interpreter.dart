@@ -8,6 +8,14 @@ import 'package:dx_flutter_demo/utils/dx_store.dart';
 
 // data helpers
 
+String getUpdatedPathContext(String currentPathContext, UnmodifiableMapView<String, dynamic> currentNode) {
+  String context = getDataPropertyRecursive(currentNode, ['config', 'context']);
+  if (context != null && context.isNotEmpty) {
+    return currentPathContext + context;
+  }
+  return currentPathContext;
+}
+
 Map getWorkObjectData(DxContext dxContext) =>
     _getDxContextData(dxContext, 'data')['content'];
 
@@ -67,18 +75,16 @@ List<dynamic> getListFromDataSource(
   return [];
 }
 
-String getRootContext(DxContext dxContext) {
-  Map rootNode = getRootNode(dxStore.state[dxContext.toString()]);
-  return getDataPropertyRecursive(rootNode, ['config', 'context']);
-}
-
 ActionData resolveActionData(String actionId, DxContext dxContext) {
   final Map data = _getDxContextData(dxContext, 'data');
   final List actions =
       getDataPropertyRecursive(data, ['case_summary', 'actions']);
-  final Map action = actions.firstWhere((action) => action['ID'] == actionId);
-  final String caseId = getDataPropertyRecursive(data, ['case_summary', 'ID']);
-  return ActionData(action['name'], action['ID'], action['type'], caseId);
+  final Map action = actions.firstWhere((action) => action['ID'] == actionId, orElse: () => null);
+  if (action != null) {
+    final String caseId = getDataPropertyRecursive(data, ['case_summary', 'ID']);
+    return ActionData(action['name'], action['ID'], action['type'], caseId);
+  }
+  return null;
 }
 
 class ActionData {
@@ -90,21 +96,22 @@ class ActionData {
   const ActionData(this.name, this.id, this.type, this.caseId);
 }
 
-dynamic resolveFormPropertyValue(String reference, DxContext dxContext) {
-  String propertyKey = reference.split('@P').last.trim().split('.').last;
+dynamic resolveFormPropertyValue(String reference, DxContext dxContext, String pathContext) {
+  String propertyKey = pathContext + reference.split('@P').last.trim();
   Map formData = getCurrentFormData();
-  if (formData != null && formData.containsKey(propertyKey)) {
-    return formData[propertyKey];
+  final formValue = getDataPropertyRecursive(formData, propertyKey.split('.'));
+  if (formValue != null) {
+    return formValue;
   }
-  return resolvePropertyValue(reference, dxContext);
+  return resolvePropertyValue(reference, dxContext, pathContext);
 }
 
-dynamic resolvePropertyValue(String reference, DxContext dxContext) {
+dynamic resolvePropertyValue(String reference, DxContext dxContext, String pathContext) {
   if (reference != null) {
     if (reference.startsWith('@P')) {
       String path = reference.split('@P ').last.trimLeft();
       if (path.startsWith('.')) {
-        path = getRootContext(dxContext) + path;
+        path = pathContext + path;
       }
       final data = _getDxContextData(dxContext, 'data');
       return getDataPropertyRecursive(data, path.split('.'));
@@ -116,7 +123,7 @@ dynamic resolvePropertyValue(String reference, DxContext dxContext) {
     if (reference.startsWith('@ASSOCIATED')) {
       String path = reference.split('@ASSOCIATED ').last.trimLeft();
       if (path.startsWith('.')) {
-        path = 'content.summary_of_associated_lists__' + path;
+        path = pathContext + '.summary_of_associated_lists__' + path;
       }
       final data = _getDxContextData(dxContext, 'context_data');
       return getDataPropertyRecursive(data, path.split('.'));
@@ -125,18 +132,18 @@ dynamic resolvePropertyValue(String reference, DxContext dxContext) {
   return reference;
 }
 
-List resolvePropertyValues(List fields, key, DxContext dxContext) {
+List resolvePropertyValues(List fields, key, DxContext dxContext, String pathContext) {
   return List.unmodifiable(fields.map((field) {
     if (field.containsKey(key)) {
       final mutableField = Map.from(field);
-      mutableField['value'] = resolvePropertyValue(field[key], dxContext);
+      mutableField['value'] = resolvePropertyValue(field[key], dxContext, pathContext);
       return Map.unmodifiable(mutableField);
     }
     return field;
   }).toList());
 }
 
-bool hasReference(Map node) => 'reference' == node['type'];
+bool hasReference(Map node) => node != null && 'reference' == node['type'];
 
 /// takes a ui metadata node and returns all key references to data stored
 /// in constellation redux store which makes it required to listen to changes
@@ -157,10 +164,10 @@ List<String> getStoreRefKeys(Map node, {String key}) {
 
 /// returns the ui metadata node reference dby the given ui metadata node in the given context (portal or page)
 UnmodifiableMapView<String, dynamic> getReferencedNode(
-    UnmodifiableMapView<String, dynamic> node, DxContext dxContext) {
+    UnmodifiableMapView<String, dynamic> node, DxContext dxContext, String pathContext) {
   final String type = getDataPropertyRecursive(node, ['config', 'type']);
   final String name = resolvePropertyValue(
-      getDataPropertyRecursive(node, ['config', 'name']), dxContext);
+      getDataPropertyRecursive(node, ['config', 'name']), dxContext, pathContext);
   switch (type) {
     case 'view':
       final data = dxStore.state[dxContext.toString()];
@@ -179,7 +186,7 @@ UnmodifiableMapView<String, dynamic> getReferencedNode(
 
 /// returns the ui metadata root node for the current data structure (eg. page or portal data)
 UnmodifiableMapView<String, dynamic> getRootNode(Map data) =>
-    getDataPropertyRecursive(data, ['root']).cast<String, dynamic>();
+    getDataPropertyRecursive(data, ['root'])?.cast<String, dynamic>();
 
 /// returns a list of child nodes for a given ui metadata node
 List<UnmodifiableMapView<String, dynamic>> getChildNodes(

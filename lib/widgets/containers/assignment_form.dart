@@ -11,11 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:dx_flutter_demo/utils/dx_interpreter.dart';
 import 'package:dx_flutter_demo/utils/dx_store.dart';
 
-import '../factory.dart';
-
 class AssignmentForm extends StatefulWidget {
   final ActionData actionData;
-  final List<Map<String, dynamic>> children;
+  final List<Widget> children;
 
   const AssignmentForm(this.actionData, this.children);
 
@@ -92,21 +90,22 @@ class AssignmentFormState extends State<AssignmentForm> {
   Widget build(BuildContext context) {
     dxStore.dispatch(
         ToggleCustomButtonsVisibility({DxContextButtonAction.submit: true}));
-    return Expanded(
-      child: Column(children: [
-        Container(
-          padding: EdgeInsets.fromLTRB(5, 12, 5, 10),
-          child: Text(widget.actionData.name,
-              style: Theme.of(context).textTheme.title),
-        ),
-        Divider(),
-        Expanded(
-            child: Form(
-                key: _formKey,
-                child: Column(children: <Widget>[
-                  ...getWidgets(widget.children, context),
-                ])))
-      ]),
-    );
+    return Column(children: [
+      Container(
+        padding: EdgeInsets.fromLTRB(5, 12, 5, 10),
+        child: Text(widget.actionData.name,
+            style: Theme.of(context).textTheme.title),
+      ),
+      Divider(),
+      Container(
+        padding: EdgeInsets.fromLTRB(7, 1, 7, 10),
+        child: Form(
+            key: _formKey,
+            child: ListView(
+              shrinkWrap: true,
+              children: widget.children,
+            ))
+      )
+    ]);
   }
 }

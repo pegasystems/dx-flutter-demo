@@ -28,6 +28,10 @@ IconData getIconData(String iconName) {
       return IconData(0xe043, fontFamily: 'Pega');
     case 'pi-filter':
       return IconData(0xe047, fontFamily: 'Pega');
+    case 'pi-times':
+      return IconData(0xe1f4, fontFamily: 'Pega');
+    case 'pi-search':
+      return IconData(0xe061, fontFamily: 'Pega');
     default:
       return IconData(0xe218, fontFamily: 'Pega'); // pi-pegasus
   }

@@ -85,20 +85,33 @@ final _reducer = combineReducers<UnmodifiableMapView<String, dynamic>>([
       (state, action) {
     return getMergedImmutableCopy(state, {'fetchingData': true});
   }),
+  TypedReducer<UnmodifiableMapView<String, dynamic>, CreateAssignment>(
+          (state, action) {
+        return getMergedImmutableCopy(state, {'fetchingData': true});
+      }),
   TypedReducer<UnmodifiableMapView<String, dynamic>,
       ToggleCustomButtonsVisibility>((state, action) {
     return getMergedImmutableCopy(state, {
       'contextButtonsVisibility': action.buttonToggles.map(
           (DxContextButtonAction button, bool shouldDisplay) =>
-              MapEntry(button.toString(), shouldDisplay))
+              MapEntry<String, bool>(button.toString(), shouldDisplay))
     });
   }),
   TypedReducer<UnmodifiableMapView<String, dynamic>, UpdateCurrentFormData>(
       (state, action) {
     final String propertyKey =
         action.propertyValueReference.split('@P').last.split('.').last;
+    final Map formUpdate = action.pathContext
+        .split('.')
+        .reversed
+        .fold({propertyKey: action.value}, (Map data, String pathKey) {
+          if (pathKey != null && pathKey.isNotEmpty) {
+            return {pathKey: data};
+          }
+          return data;
+        });
     return getMergedImmutableCopy(state, {
-      'currentFormData': {propertyKey: action.value}
+      'currentFormData': formUpdate
     });
   })
 ]);
@@ -129,6 +142,15 @@ class _OpenAssignmentEpic implements EpicClass<Map> {
       Observable(actions)
           .whereType<OpenAssignment>()
           .asyncMap((action) => openAssignment(action.pzInsKey))
+          .map((data) => SetCurrentPage(data));
+}
+
+class _CreateAssignmentEpic implements EpicClass<Map> {
+  @override
+  Stream<dynamic> call(Stream<dynamic> actions, EpicStore<Map> store) =>
+      Observable(actions)
+          .whereType<CreateAssignment>()
+          .asyncMap((action) => createAssignment(action.pyClassName, action.pyFlowType))
           .map((data) => SetCurrentPage(data));
 }
 
@@ -198,6 +220,13 @@ class OpenAssignment {
   const OpenAssignment(this.pzInsKey);
 }
 
+class CreateAssignment {
+  final String pyClassName;
+  final String pyFlowType;
+
+  const CreateAssignment(this.pyClassName, this.pyFlowType);
+}
+
 // button actions available depending on the current page context
 enum DxContextButtonAction { submit, cancel, next, search, filter }
 
@@ -217,9 +246,10 @@ class ToggleCustomButtonsVisibility {
 
 class UpdateCurrentFormData {
   final String propertyValueReference;
+  final String pathContext;
   final value;
 
-  const UpdateCurrentFormData(this.propertyValueReference, this.value);
+  const UpdateCurrentFormData(this.propertyValueReference, this.pathContext, this.value);
 }
 
 class ProcessAssignment {
@@ -238,7 +268,7 @@ class RemoveError {
   const RemoveError();
 }
 
-final initialContextButtonsVisibility = Map.unmodifiable({
+final initialContextButtonsVisibility = Map<String, dynamic>.unmodifiable({
   DxContextButtonAction.submit.toString(): false,
   DxContextButtonAction.cancel.toString(): false,
   DxContextButtonAction.next.toString(): false,
@@ -258,5 +288,6 @@ final dxStore = Store<UnmodifiableMapView<String, dynamic>>(_reducer,
       EpicMiddleware<Map>(_FetchPortalEpic()),
       EpicMiddleware<Map>(_FetchPageEpic()),
       EpicMiddleware<Map>(_OpenAssignmentEpic()),
+      EpicMiddleware<Map>(_CreateAssignmentEpic()),
       EpicMiddleware<Map>(_ProcessAssignment()),
     ]);

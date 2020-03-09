@@ -14,18 +14,16 @@ class InputText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.fromLTRB(5, 1, 5, 1),
-        child: TextFormField(
-          onChanged: onChange,
-          initialValue: value,
-          decoration: InputDecoration(hintText: label),
-          validator: (value) {
-            if (required == true && value.isEmpty) {
-              return 'field required';
-            }
-            return null;
-          },
-        ));
+    return TextFormField(
+      onChanged: onChange,
+      initialValue: value,
+      decoration: InputDecoration(labelText: label),
+      validator: (value) {
+        if (required == true && value.isEmpty) {
+          return 'field required';
+        }
+        return null;
+      },
+    );
   }
 }

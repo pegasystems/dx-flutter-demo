@@ -4,20 +4,20 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
-import '../factory.dart';
 
 class Page extends StatelessWidget {
   final String title;
-  final List<Map<String, dynamic>> children;
+  final List<Widget> children;
 
   const Page(this.title, this.children);
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> widgets = getWidgets(children, context);
+    List<Widget> widgets = children;
     if (title != null && title.isNotEmpty) {
       widgets = [
         Container(
+          alignment: Alignment.center,
           padding: EdgeInsets.fromLTRB(5, 12, 5, 5),
           child: Text(title, style: Theme.of(context).textTheme.headline),
         ),
@@ -25,6 +25,6 @@ class Page extends StatelessWidget {
         ...widgets
       ];
     }
-    return Column(children: widgets);
+    return ListView(children: widgets);
   }
 }

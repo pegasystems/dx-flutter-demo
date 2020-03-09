@@ -5,38 +5,46 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:dx_flutter_demo/utils/pega_icons.dart';
-import 'package:dx_flutter_demo/widgets/factory.dart';
 
 class CaseView extends StatelessWidget {
   final String label;
   final String id;
   final String iconName;
-  final List<Map<String, dynamic>> children;
+  final List<Widget> children;
 
   const CaseView(this.label, this.id, this.iconName, this.children);
 
   @override
   Widget build(BuildContext context) {
-    Widget header = Card(
-        color: Theme.of(context).accentColor,
-        child: Container(
-          padding: EdgeInsets.all(10),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.fromLTRB(0, 5, 10, 5),
-                child: Icon(getIconData(iconName)),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, style: Theme.of(context).accentTextTheme.title),
-                  Text(id, style: Theme.of(context).accentTextTheme.subtitle)
-                ],
+    Widget header = Container(
+      color: Color(0xFF295ED9),
+      padding: EdgeInsets.fromLTRB(10, 15, 10, 15),
+      child: Row(
+        children: [
+          Container(
+            alignment: Alignment.center,
+            decoration: ShapeDecoration(
+              color: Color(0xFF113DA6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(5))
               )
-            ],
+            ),
+            padding: EdgeInsets.all(10),
+            child: Icon(getIconData(iconName), color: Colors.white,),
           ),
-        ));
-    return Column(children: [header, ...getWidgets(children, context)]);
+          Container(
+            padding: EdgeInsets.only(left: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(id, style: Theme.of(context).accentTextTheme.subtitle),
+                Text(label, style: Theme.of(context).accentTextTheme.title),
+              ],
+            )
+          )
+        ],
+      ),
+    );
+    return ListView(children: [header, ...children]);
   }
 }

@@ -11,6 +11,7 @@ import 'package:dx_flutter_demo/utils/dx_store.dart';
 import 'package:dx_flutter_demo/utils/pega_icons.dart';
 import 'package:dx_flutter_demo/widgets/factory.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:flutter_svg/svg.dart';
 
 class AppShell extends StatelessWidget {
   final String appName;
@@ -23,7 +24,7 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(title: Text(appName)),
+        appBar: AppBar(title: Text(appName, style: TextStyle(color: Colors.white)), backgroundColor: Color(0xFF1F2555),),
         floatingActionButton: StoreConnector<
                 UnmodifiableMapView<String, dynamic>,
                 UnmodifiableMapView<String, dynamic>>(
@@ -57,36 +58,93 @@ class AppShell extends StatelessWidget {
                 UnmodifiableMapView<String, dynamic>>(
             converter: (dxStore) => getCurrentPage(),
             distinct: true,
-            builder: (context, node) => getWidget(getRootNode(node), context)),
+            builder: (context, node) {
+              final root = getRootNode(node);
+              return getWidget(root, context, getUpdatedPathContext('', root));
+            }),
         drawer: Drawer(
-            child: ListView(padding: EdgeInsets.zero, children: [
-          DrawerHeader(
-            child: Text('Menu'),
-            decoration: BoxDecoration(
-              color: Theme.of(context).accentColor,
-            ),
-          ),
-          ExpansionTile(
-              leading: Icon(Icons.add),
-              title: Text('Create...'),
-              children: caseTypes
-                  .map((caseType) => ListTile(
-                      // leading: Icon(Icons.create),
-                      title: Text(caseType['pyLabel']),
-                      onTap: () => {}))
-                  .toList()
-              //),
-              ),
-          ...pages
-              .map((page) => ListTile(
-                  leading: Icon(getIconData(page['pxPageViewIcon'])),
-                  title: Text(page['pyLabel']),
-                  onTap: () {
-                    Navigator.pop(context);
-                    dxStore.dispatch(
-                        FetchPage(page['pyRuleName'], page['pyClassName']));
-                  }))
-              .toList()
-        ])));
+            child: Container(
+              color: Color(0xFF262626),
+              child: SafeArea(
+                child: ListView(padding: EdgeInsets.zero, children: [
+                  Container(
+                    child: Container(
+                        alignment: Alignment.center,
+                        child: Column(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(5),
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                          child: SvgPicture.asset(
+                                            'assets/images/pega.svg',
+                                            color: Colors.white,
+                                          )
+                                      ),
+                                      Container(
+                                        padding: EdgeInsets.only(left: 10),
+                                        child: Text('Space Travel', style: Theme.of(context).textTheme.headline.copyWith(color: Colors.white)),
+                                      )
+                                    ]
+                                ),
+                              ),
+                              Padding(
+                                  padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                                  child: Container(
+                                      decoration: ShapeDecoration(
+                                          color: Color(0xFFCFD1E6),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(Radius.circular(25))
+                                          )
+                                      ),
+                                      child: Container(
+                                          padding: EdgeInsets.only(left: 10),
+                                          child: TextField(
+                                            decoration: InputDecoration(
+                                                isDense: true,
+                                                icon: Icon(getIconData('pi-search')),
+                                                border: InputBorder.none,
+                                                hintText: 'Search...',
+                                                hintStyle: Theme.of(context).textTheme.body1.copyWith(color: Color(0xFF919191), fontStyle: FontStyle.italic)
+                                            ),
+                                          )
+                                      )
+                                  )
+                              )
+                            ]
+                        )
+                    ),
+                  ),
+
+                  Divider(color: Color(0xFF383838)),
+                  ExpansionTile(
+                      backgroundColor: Color(0xFF383838),
+                      leading: Icon(Icons.add, color: Color(0xFF919191)),
+                      title: Text('Create', style: Theme.of(context).textTheme.title.copyWith(color: Color(0xFF919191))),
+                      children: caseTypes
+                          .map((caseType) => ListTile(
+                          leading: Text(''),
+                          title: Text(caseType['pyLabel'], style: Theme.of(context).textTheme.subtitle.copyWith(color: Color(0xFF919191))),
+                          onTap: () {
+                            Navigator.pop(context);
+                            dxStore.dispatch(CreateAssignment(caseType['pyClassName'], caseType['pyFlowType']));
+                          }))
+                          .toList()
+                  ),
+                  ...pages
+                      .map((page) => ListTile(
+                      leading: Icon(getIconData(page['pxPageViewIcon']), color: Color(0xFF919191),),
+                      title: Text(page['pyLabel'], style: Theme.of(context).textTheme.title.copyWith(color: Color(0xFF919191))),
+                      onTap: () {
+                        Navigator.pop(context);
+                        dxStore.dispatch(
+                            FetchPage(page['pyRuleName'], page['pyClassName']));
+                      }))
+                      .toList()
+                ])
+              )
+            )));
   }
 }

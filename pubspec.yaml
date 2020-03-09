@@ -26,6 +26,7 @@ dependencies:
   rxdart: 0.22.2
   intl: ^0.16.0
   date_range_picker: ^1.0.6
+  flutter_svg: ^0.17.2
 
 
 dev_dependencies:
@@ -44,6 +45,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+    - assets/images/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #  - images/a_dot_burr.jpeg

@@ -4,36 +4,16 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
-import '../factory.dart';
 
 class Region extends StatelessWidget {
   final String name;
-  final List<Map<String, dynamic>> children;
+  final List<Widget> children;
 
   const Region(this.name, this.children);
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        flex: getRegionSizeRatio(name),
-        child: Card(
-            child: Column(
-          children: getWidgets(children, context),
-        )));
+    return ListView(shrinkWrap: true, children: children);
   }
 }
 
-int getRegionSizeRatio(String regionName) {
-  switch (regionName) {
-    case 'Main':
-      return 10;
-    case 'Info':
-      return 2;
-    case 'Left':
-    case 'B':
-    case 'Utilities':
-      return 0;
-    default:
-      return 1;
-  }
-}
