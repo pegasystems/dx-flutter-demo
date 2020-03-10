@@ -49,8 +49,7 @@ Widget skipNode(UnmodifiableMapView<String, dynamic> node, BuildContext context,
   final List<UnmodifiableMapView<String, dynamic>> children =
       getChildNodes(node);
   if (children.length > 1) {
-    return ListView(
-        shrinkWrap: true,
+    return Column(
         children: getWidgets(children, context,
             getUpdatedPathContext(pathContext, node), dxContext));
   }

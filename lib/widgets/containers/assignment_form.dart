@@ -101,8 +101,7 @@ class AssignmentFormState extends State<AssignmentForm> {
         padding: EdgeInsets.fromLTRB(7, 1, 7, 10),
         child: Form(
             key: _formKey,
-            child: ListView(
-              shrinkWrap: true,
+            child: Column(
               children: widget.children,
             ))
       )
