@@ -1,4 +1,4 @@
-# dx-flutter-demo
+# ![DxF Logo](/logo.png)
 
 This project demonstrates how new Pega's DX API may be integrated with 3th party SDKs such as Google's [Flutter](https://flutter.dev/).
 

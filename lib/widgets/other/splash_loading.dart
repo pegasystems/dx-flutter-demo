@@ -18,23 +18,12 @@ class SplashLoading extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SvgPicture.asset(
-            'assets/images/pega.svg',
+            'assets/images/logo.svg',
             color: Colors.white,
+            height: MediaQuery.of(context).size.height * 0.25,
           ),
-          Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Dx', style: TextStyle(color: Colors.lightBlue, fontSize: 60),),
-                Text('F', style: TextStyle(color: Colors.purpleAccent, fontSize: 60),),
-              ]
-            )
-          ),
-          Container(
-            padding: EdgeInsets.only(top: 15),
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF295ED9)),
-            )
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF295ED9)),
           )
         ],
       )
