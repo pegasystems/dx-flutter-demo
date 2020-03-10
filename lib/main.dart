@@ -28,11 +28,11 @@ void main() {
               converter: (dxStore) => getCurrentPortal(),
               distinct: true,
               builder: (context, portal) {
-                if (portal != null) {
-                  final node = getRootNode(portal);
-                  return getWidget(node, context, getUpdatedPathContext('', node),
-                      dxContext: DxContext.currentPortal);
-                }
+//                if (portal != null) {
+//                  final node = getRootNode(portal);
+//                  return getWidget(node, context, getUpdatedPathContext('', node),
+//                      dxContext: DxContext.currentPortal);
+//                }
                 return SplashLoading();
               }))));
 
