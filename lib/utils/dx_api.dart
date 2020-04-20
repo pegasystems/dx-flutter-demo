@@ -9,10 +9,9 @@ import 'dart:convert';
 
 import 'dx_interpreter.dart';
 
-final String _username = 'user@constellation.com';
-final String _password = 'rules';
-// final String _baseUrl = 'https://lu-84-cam.eng.pega.com';
-final String _baseUrl = 'http://l35942meu.rpega.com:1080';
+final String _username = 'user_id'; // eg. 'user@constellation'
+final String _password = 'user_password'; // eg. 'my_password'
+final String _baseUrl = 'server_base_url_with_protocol_and_port_number'; // eg. 'https://my.pega.server:8080'
 
 final _headers = {
   'Accept': 'application/json',

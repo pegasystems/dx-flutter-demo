@@ -8,7 +8,7 @@ This Flutter project allows to build an Android and/or iOS application that comm
 
 - This project is just a **DEMO**. It should not be treated as a complete Fit-All Application or sound SDK to build upon. It's currently lacking support for many DX API features and due to the dynamic nature of Pega and DX API, the application will throw errors, not properly display or display incomplete chunks of UI or even crash and/or stop responding.
 - It may be treated by developers as a **boilerplate** application, as it provides some architecture foundations which play out very well with Pega Platform and DX API natures.
- 
+
 ## The architecture
 
 - Similar to Constellation's Web version, the application uses a [Flux](https://facebook.github.io/flux/) architecture to build it's UI. That's no surprise, as it fits very well into the DX API response model, as well as with Flutter API to build UI. It's not mandatory though.
@@ -18,7 +18,7 @@ This Flutter project allows to build an Android and/or iOS application that comm
 
 ### Hold your horses, Bill
 - You will need a Pega Platform 8.4 instance and a Constellation App configured. Lucky for us, Pega Platform 8.4 comes with a bundled demo Constellation App, aka. "Space Travel". You can use this app.
-- Your user will need `YourApp:PegaAPI` Role in the Access Group. Lucky for us, `user@constellation.com` (with `rules` password) , does already have this role.
+- Your user will need `YourApp:PegaAPI` Role in the Access Group. Lucky for us, `user@constellation.com`, does already have this role.
 
 ### I said, let's! get! started!
 
